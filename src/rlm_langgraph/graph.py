@@ -49,10 +49,13 @@ def route_after_final_check(state: RLMState) -> Literal["format_output", "fallba
     return "llm_query"
 
 
+_USE_DEFAULT_CHECKPOINTER = object()
+
+
 def build_rlm_graph(
     root_llm: BaseChatModel,
     recursive_llm: BaseChatModel | None = None,
-    checkpointer=None,
+    checkpointer=_USE_DEFAULT_CHECKPOINTER,
 ):
     """
     Build the RLM LangGraph.
@@ -60,7 +63,10 @@ def build_rlm_graph(
     Args:
         root_llm: The primary language model for reasoning
         recursive_llm: The model for sub-LLM calls (defaults to root_llm)
-        checkpointer: Optional LangGraph checkpointer for persistence
+        checkpointer: LangGraph checkpointer for persistence.
+            - Default: Uses MemorySaver
+            - None: No checkpointer (for LangGraph API which handles persistence)
+            - Custom checkpointer: Use provided checkpointer
 
     Returns:
         Compiled LangGraph ready for execution
@@ -128,7 +134,7 @@ def build_rlm_graph(
     builder.add_edge("fallback", END)
 
     # Compile with optional checkpointer
-    if checkpointer is None:
+    if checkpointer is _USE_DEFAULT_CHECKPOINTER:
         checkpointer = MemorySaver()
 
     return builder.compile(checkpointer=checkpointer)
@@ -138,7 +144,7 @@ def create_openai_rlm_graph(
     root_model: str = "gpt-4o",
     recursive_model: str = "gpt-4o-mini",
     temperature: float = 0.7,
-    checkpointer=None,
+    checkpointer=_USE_DEFAULT_CHECKPOINTER,
 ):
     """
     Create an RLM graph using OpenAI models.
@@ -147,7 +153,7 @@ def create_openai_rlm_graph(
         root_model: OpenAI model name for main reasoning
         recursive_model: OpenAI model name for sub-LLM calls
         temperature: LLM temperature
-        checkpointer: Optional checkpointer for persistence
+        checkpointer: Checkpointer for persistence (None = no checkpointer)
 
     Returns:
         Compiled LangGraph
@@ -168,7 +174,7 @@ def create_anthropic_rlm_graph(
     root_model: str = "claude-3-5-sonnet-20241022",
     recursive_model: str = "claude-3-5-haiku-20241022",
     temperature: float = 0.7,
-    checkpointer=None,
+    checkpointer=_USE_DEFAULT_CHECKPOINTER,
 ):
     """
     Create an RLM graph using Anthropic models.
@@ -177,7 +183,7 @@ def create_anthropic_rlm_graph(
         root_model: Anthropic model name for main reasoning
         recursive_model: Anthropic model name for sub-LLM calls
         temperature: LLM temperature
-        checkpointer: Optional checkpointer for persistence
+        checkpointer: Checkpointer for persistence (None = no checkpointer)
 
     Returns:
         Compiled LangGraph

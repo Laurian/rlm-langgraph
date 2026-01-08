@@ -174,6 +174,48 @@ result = await graph.ainvoke(initial_state, config)
 state = graph.get_state(config)
 ```
 
+## LangGraph Studio (Interactive Visualization)
+
+You can run the RLM graph interactively using LangGraph Studio, which provides a visual interface for exploring graph execution, inspecting state, and debugging.
+
+### Setup
+
+1. Install dev dependencies:
+
+```bash
+uv sync --all-extras
+```
+
+2. Add your LangSmith API key to `.env` (recommended for tracing):
+
+```bash
+LANGSMITH_API_KEY=lsv2_...
+```
+
+3. Start the dev server:
+
+```bash
+uv run langgraph dev
+```
+
+4. Open http://localhost:8123 in your browser
+
+### Example Input
+
+Use this sample input to test the graph:
+
+```json
+{
+  "query": "What is the total price of all in-stock products?",
+  "context": "Product Catalog:\n1. Widget Pro - $49.99 (In stock: Yes)\n2. Gadget Plus - $79.99 (In stock: No)\n3. Super Tool - $129.99 (In stock: Yes)"
+}
+```
+
+This example demonstrates:
+- Code execution in the REPL (parsing prices, filtering in-stock items)
+- The iterative reasoning loop
+- Final answer via `FINAL()` call
+
 ## How It Works
 
 ### Architecture
@@ -253,6 +295,9 @@ FINAL(final)
 # .env
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
+
+# Recommended for langgraph dev (enables tracing in LangSmith Studio)
+LANGSMITH_API_KEY=lsv2_...
 ```
 
 ### Graph Options
